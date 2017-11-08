@@ -65,16 +65,23 @@ if __name__ == '__main__':
     print(wordbook.token2id)
 
     # BoW (単語id, 出現回数)と表現される
+    dense_list = []
     for w in words:
         vector = wordbook.doc2bow(w)
         # 特徴ベクトルの取得
         dense = list(matutils.corpus2dense([vector], num_terms=len(wordbook)).T[0])
-        print(dense)
 
-        # 正解ラベル
-        label_train = [1, 0] # 1:ITライフハック, 0: 独女通信
+        dense_list.append(dense)
 
-        estimator = RandomForestClassifier()
+    print(dense_list)
+    # 正解ラベル
+    label_train = [1, 0] # 1:ITライフハック, 0: 独女通信
 
-        # 学習させる
-        estimator.fit(dense, label_train)
+    estimator = RandomForestClassifier()
+
+    # 学習させる
+    estimator.fit(dense_list, label_train)
+
+    # 予測
+    label_predict = estimator.predict(dense_list)
+    print(label_predict)
