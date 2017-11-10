@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import MeCab
 from gensim import corpora, matutils
 from sklearn.ensemble import RandomForestClassifier
@@ -42,6 +43,20 @@ def get_words_main(content):
     # return arr
     return [token for token in tokenize(content)]
 
+def dir_list():
+    """
+    記事を管理するディレトリ一覧を返す
+    :return:
+    """
+    path = 'text/'
+    dirList = []
+    for list in os.listdir(path):
+        print(path + list)
+        if os.path.isdir(path + list):
+            dirList.append(list)
+
+    return dirList
+
 if __name__ == '__main__':
     # {}はマップ型といって連想配列
     words = get_words({
@@ -75,6 +90,8 @@ if __name__ == '__main__':
 
     print(dense_list)
     # 正解ラベル
+    # 0: 'dokujo-tsushin' 1: 'it-life-hack' 2: 'kaden-channel' 3: 'livedoor-homme' 4:'movie-enter'
+    # 5: 'peachy' 6: 'smax' 7: 'sports-watch' 8: 'topic-news'
     label_train = [1, 0] # 1:ITライフハック, 0: 独女通信
 
     estimator = RandomForestClassifier()
