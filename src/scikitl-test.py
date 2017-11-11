@@ -3,6 +3,7 @@ import os
 import MeCab
 from gensim import corpora, matutils
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
 
 mecab = MeCab.Tagger('mecabrc')
 
@@ -49,12 +50,12 @@ def dir_list():
     記事を管理するディレトリ一覧を返す
     :return:
     """
-    dirList = []
-    for list in os.listdir(data_path()):
-        if os.path.isdir(data_path(list)):
-            dirList.append(list)
+    _dir_list = []
+    for content in os.listdir(data_path()):
+        if os.path.isdir(data_path(content)):
+            _dir_list.append(content)
 
-    return dirList
+    return _dir_list
 
 def file_list(directory):
     """
@@ -64,7 +65,7 @@ def file_list(directory):
     """
     filelist = []
     for file in os.listdir(data_path(directory)):
-        if file != 'LICENSE.txt' and os.path.isfile(data_path(directory) + file):
+        if directory in file and os.path.isfile(data_path(directory) + file):
             filelist.append(file)
 
     return filelist
@@ -89,16 +90,32 @@ def read_data(filepath):
     """
     with open(filepath, 'r') as r:
         text_contents = r.readlines()
+    contents = [content.strip() for content in text_contents if len(content.strip()) != 0]
 
-    return [content.strip() for content in text_contents if len(content.strip()) != 0]
+    return ''.join(contents)
 
-if __name__ == '__main__':
-    # {}はマップ型といって連想配列
-    words = get_words({
-        'it-life-hack-001.txt': 'アナタはまだブラウザのブックマーク？　ブックマーク管理はライフリストがオススメ 最近ネットサーフィンをする際にもっぱら利用しているのが「ライフリスト」というサイトだ。この「ライフリスト」は、ひとことで言うと自分専用のブックマークサイトである。というよりブラウザのスタートページにするとブラウザのブックマーク管理が不要になる便利なサイトなのである。',
-        'dokujo-tsushin-001.txt': 'たとえば、馴れ馴れしく近づいてくるチャラ男、クールを装って迫ってくるエロエロ既婚男性etc…に対し「下心、見え見え〜」と思ったことはないだろうか？ “下心”と一言で言うと、特に男性が女性のからだを目的に執拗に口説くなど、イヤらしい言葉に聞こえてしまう。実際、辞書で「下心」の意味を調べてみると、心の底で考えていること。かねて心に期すること、かねてのたくらみ。特に、わるだくみ。（広辞苑より）という意味があるのだから仕方がないのかもしれない。'
-    })
+def class_id(file):
+    dir_lists = dir_list()
+    dir_name = next(filter(lambda x: x in file, dir_lists), None)
+
+    return dir_lists.index(dir_name)
+
+def main():
+    contents = {}
+    data_train = []
+    # 正解ラベル 0: 独女通信, 1:ITライフハック...
+    label_train = []
+
+    directories = dir_list()
+    for directory in directories:
+        files = file_list(directory)
+        for file in files:
+            content = read_data(data_path(directory) + file)
+            contents[file] = content
+            label_train.append(class_id(file))
+
     # ワードの重複を除いた、辞書リストの作成
+    words = get_words(contents)
     wordbook = corpora.Dictionary(words)
 
     # ここは調整が必要
@@ -112,28 +129,34 @@ if __name__ == '__main__':
     # 作った辞書ファイルをロードして(wordbook)辞書オブジェクト作る
     # wordbook = corpora.Dictionary.load_from_text(SAVE_FILE_NAME)
 
-    print(wordbook.token2id)
-
     # BoW (単語id, 出現回数)と表現される
-    dense_list = []
     for w in words:
         vector = wordbook.doc2bow(w)
         # 特徴ベクトルの取得
         dense = list(matutils.corpus2dense([vector], num_terms=len(wordbook)).T[0])
+        data_train.append(dense)
 
-        dense_list.append(dense)
-
-    print(dense_list)
-    # 正解ラベル
-    # 0: 'dokujo-tsushin' 1: 'it-life-hack' 2: 'kaden-channel' 3: 'livedoor-homme' 4:'movie-enter'
-    # 5: 'peachy' 6: 'smax' 7: 'sports-watch' 8: 'topic-news'
-    label_train = [1, 0] # 1:ITライフハック, 0: 独女通信
-
+    # ランダムフォレストオブジェクト生成
     estimator = RandomForestClassifier()
 
     # 学習させる
-    estimator.fit(dense_list, label_train)
+    estimator.fit(data_train, label_train)
 
     # 予測
-    label_predict = estimator.predict(dense_list)
-    print(label_predict)
+    # label_predict = estimator.predict(data_train)
+
+    # 予測結果
+    print(estimator.score(data_train, label_train))
+
+    # 学習データと試験データに分ける
+    data_train_s, data_test_s, label_train_s, label_test_s = train_test_split(data_train, label_train, test_size=0.5)
+
+    # もう一度ランダムフォレストで検証する
+    estimator2 = RandomForestClassifier()
+
+    estimator2.fit(data_train_s, label_train_s)
+
+    print(estimator2.score(data_train_s, label_train_s))
+
+if __name__ == '__main__':
+    main()
