@@ -77,11 +77,22 @@ def data_path(directory=""):
     :param directory:
     :return:
     """
-    if (len(directory) == 0):
+    if len(directory) == 0:
         return DATA_PATH
 
     return DATA_PATH + directory + "/"
 
+def read_data(filepath):
+    """
+    ファイルから記事を読み込み、不要な文字列を排除し返す
+    :param filepath:
+    :return:
+    """
+    r = open(filepath, 'r')
+    text_contents = r.readlines()
+    r.close()
+
+    return [content.strip() for content in text_contents if len(content.strip()) != 0]
 
 if __name__ == '__main__':
     # {}はマップ型といって連想配列
