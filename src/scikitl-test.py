@@ -6,7 +6,11 @@ from sklearn.ensemble import RandomForestClassifier
 
 mecab = MeCab.Tagger('mecabrc')
 
+# 記事データを管理してるディレクトリパス
 DATA_PATH = 'text/'
+
+# 辞書保存ファイル名
+SAVE_FILE_NAME = 'dictionary.txt'
 
 def tokenize(text):
     """
@@ -60,7 +64,7 @@ def file_list(directory):
     """
     filelist = []
     for file in os.listdir(data_path(directory)):
-        if os.path.isfile(data_path(directory) + file):
+        if file != 'LICENSE.txt' and os.path.isfile(data_path(directory) + file):
             filelist.append(file)
 
     return filelist
@@ -83,9 +87,8 @@ def read_data(filepath):
     :param filepath:
     :return:
     """
-    r = open(filepath, 'r')
-    text_contents = r.readlines()
-    r.close()
+    with open(filepath, 'r') as r:
+        text_contents = r.readlines()
 
     return [content.strip() for content in text_contents if len(content.strip()) != 0]
 
@@ -104,10 +107,10 @@ if __name__ == '__main__':
     # wordbook.filter_extremes(no_below=1, no_above=0.7)
 
     # 辞書リストを.txtに保存
-    wordbook.save_as_text('dictionary.txt')
+    wordbook.save_as_text(SAVE_FILE_NAME)
 
     # 作った辞書ファイルをロードして(wordbook)辞書オブジェクト作る
-    # wordbook = corpora.Dictionary.load_from_text('livedoordic.txt')
+    # wordbook = corpora.Dictionary.load_from_text(SAVE_FILE_NAME)
 
     print(wordbook.token2id)
 
