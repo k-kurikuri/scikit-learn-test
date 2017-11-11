@@ -38,11 +38,6 @@ def get_words_main(content):
     :param content:
     :return:
     """
-    # []はリスト内包表記を表す文法で1ライナーで記述できる。以下のfor inと意味は同じだが処理も速いというベンチがある
-    # arr = []
-    # for token in tokenize(content):
-    #     arr.append(token)
-    # return arr
     return [token for token in tokenize(content)]
 
 def dir_list():
