@@ -6,6 +6,8 @@ from sklearn.ensemble import RandomForestClassifier
 
 mecab = MeCab.Tagger('mecabrc')
 
+DATA_PATH = 'text/'
+
 def tokenize(text):
     """
     形態素解析で単語を取り出す
@@ -48,14 +50,38 @@ def dir_list():
     記事を管理するディレトリ一覧を返す
     :return:
     """
-    path = 'text/'
     dirList = []
-    for list in os.listdir(path):
-        print(path + list)
-        if os.path.isdir(path + list):
+    for list in os.listdir(data_path()):
+        if os.path.isdir(data_path(list)):
             dirList.append(list)
 
     return dirList
+
+def file_list(directory):
+    """
+    指定したディレクトリ内から記事ファイル一覧を返す
+    :param directory:
+    :return:
+    """
+    filelist = []
+    for file in os.listdir(data_path(directory)):
+        if os.path.isfile(data_path(directory) + file):
+            filelist.append(file)
+
+    return filelist
+
+def data_path(directory=""):
+    """
+    記事データの相対パスで返す
+    空文字の場合は記事データのディレクトリのみ返す
+    :param directory:
+    :return:
+    """
+    if (len(directory) == 0):
+        return DATA_PATH
+
+    return DATA_PATH + directory + "/"
+
 
 if __name__ == '__main__':
     # {}はマップ型といって連想配列
