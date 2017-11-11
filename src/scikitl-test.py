@@ -89,7 +89,7 @@ def read_data(filepath):
     :return:
     """
     with open(filepath, 'r') as r:
-        text_contents = r.readlines()
+        text_contents = r.readlines()[2:]
     contents = [content.strip() for content in text_contents if len(content.strip()) != 0]
 
     return ''.join(contents)
@@ -121,7 +121,7 @@ def main():
     # ここは調整が必要
     # no_berow: 使われてる文章がno_berow個以下の単語無視
     # no_above: 使われてる文章の割合がno_above以上の場合無視
-    # wordbook.filter_extremes(no_below=1, no_above=0.7)
+    wordbook.filter_extremes(no_below=20, no_above=0.2)
 
     # 辞書リストを.txtに保存
     wordbook.save_as_text(SAVE_FILE_NAME)
