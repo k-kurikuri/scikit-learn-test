@@ -104,7 +104,7 @@ if __name__ == '__main__':
     # wordbook.filter_extremes(no_below=1, no_above=0.7)
 
     # 辞書リストを.txtに保存
-    wordbook.save_as_text('livedoordic.txt')
+    wordbook.save_as_text('dictionary.txt')
 
     # 作った辞書ファイルをロードして(wordbook)辞書オブジェクト作る
     # wordbook = corpora.Dictionary.load_from_text('livedoordic.txt')
